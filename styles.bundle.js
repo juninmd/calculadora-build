@@ -1,5 +1,12 @@
 webpackJsonp([1],{
 
+/***/ "../../../../../src/materialicons.woff2":
+/***/ (function(module, exports, __webpack_require__) {
+
+module.exports = __webpack_require__.p + "materialicons.dfc4be8167690d9d34c6.woff2";
+
+/***/ }),
+
 /***/ "../../../../../src/styles.css":
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -35,7 +42,7 @@ exports = module.exports = __webpack_require__("../../../../css-loader/lib/css-b
 exports.i(__webpack_require__("../../../../css-loader/index.js?{\"sourceMap\":false,\"importLoaders\":1}!../../../../postcss-loader/index.js?{\"ident\":\"postcss\"}!../../../../materialize-css/dist/css/materialize.css"), "");
 
 // module
-exports.push([module.i, "/* You can add global styles to this file, and also import other style files */\r\n.container{\r\n    margin: 0 auto;\r\n    max-width: 1280px;\r\n    width: 100%;\r\n    padding-left: 4%;\r\n    padding-top: 13px;\r\n}\r\n.semicontainer{\r\n    margin: 0 auto;\r\n    max-width: 1280px;\r\n    width: 90%;\r\n    padding: 13px;\r\n}\r\n\r\n\r\n.header {\r\n    color: #ee6e73;\r\n    font-weight: 300;\r\n}\r\n\r\nbody{\r\n    background-color: rgba(23, 23, 23, 0.89);\r\n}\r\n.destaque{\r\n    background-color: #eaeaea;\r\n}", ""]);
+exports.push([module.i, "/* You can add global styles to this file, and also import other style files */\r\n.container{\r\n    margin: 0 auto;\r\n    max-width: 1280px;\r\n    width: 100%;\r\n    padding-left: 4%;\r\n    padding-top: 13px;\r\n}\r\n.semicontainer{\r\n    margin: 0 auto;\r\n    max-width: 1280px;\r\n    width: 90%;\r\n    padding: 13px;\r\n}\r\n\r\n\r\n.header {\r\n    color: #ee6e73;\r\n    font-weight: 300;\r\n}\r\n\r\nbody{\r\n    background-color: rgba(23, 23, 23, 0.89);\r\n}\r\n.destaque{\r\n    background-color: #eaeaea;\r\n}\r\n\r\n/* fallback */\r\n@font-face {\r\n  font-family: 'Material Icons';\r\n  font-style: normal;\r\n  font-weight: 400;\r\n  src: local('Material Icons'), local('MaterialIcons-Regular'), url(" + __webpack_require__("../../../../../src/materialicons.woff2") + ") format('woff2');\r\n}\r\n\r\n.material-icons {\r\n  font-family: 'Material Icons';\r\n  font-weight: normal;\r\n  font-style: normal;\r\n  font-size: 24px;\r\n  line-height: 1;\r\n  letter-spacing: normal;\r\n  text-transform: none;\r\n  display: inline-block;\r\n  white-space: nowrap;\r\n  word-wrap: normal;\r\n  direction: ltr;\r\n  -moz-font-feature-settings: 'liga';\r\n  -moz-osx-font-smoothing: grayscale;\r\n}\r\n", ""]);
 
 // exports
 
