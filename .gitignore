@@ -1,1 +1,24 @@
+# Dependencies
 /node_modules
+
+# Logs
+*.log
+npm-debug.log*
+
+# Environment and secrets
+.env
+.env.local
+.env.*.local
+*.key
+*.pem
+*.p12
+*.pfx
+secrets/
+config/secrets.yml
+
+# Build artifacts (source maps can leak application source code)
+*.map
+
+# OS / editor files
+.DS_Store
+Thumbs.db
