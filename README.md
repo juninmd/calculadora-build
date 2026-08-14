@@ -27,3 +27,15 @@ npm install -g @codicons/calculator-build
 
 Include a short description, an installation section, and a usage section based on the files you see. Only return the raw markdown content, no conversational text.
 ```
+
+## Security
+
+See [SECURITY.md](SECURITY.md) for the security policy, vulnerability reporting
+process and a full description of the hardened server controls.
+
+The server applies security headers (CSP, HSTS, clickjacking and MIME
+protection), validates request paths, rate limits clients, blocks access to
+server files and source maps, and centralizes error handling. All
+configuration is provided through environment variables (see the table in
+SECURITY.md); secrets must never be committed. Dependency updates are
+automated via Dependabot and Renovate, and `npm audit` runs in CI.
