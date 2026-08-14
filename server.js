@@ -1,18 +1,19 @@
-const express = require('express');
-const app = express();
-var mustache = require('mustache');
-var engines = require('consolidate');
+/**
+ * Application entry point.
+ *
+ * Starts the hardened calculadora HTTP server on the configured port.
+ */
 
-app.use(express.static(__dirname));
+'use strict';
 
-app.set('views', __dirname);
-app.engine('html', engines.mustache);
-app.set('view engine', 'html');
+const { loadConfig } = require('./src/config');
+const { createApp } = require('./app');
 
-app.route("/*").get((req, res) => {
-    res.render('index.html');
-});
+const config = loadConfig();
+const app = createApp();
 
-app.listen(process.env.PORT || 8080, () => {
-    console.log(`Aplicação ativa :D |http://localhost:${process.env.PORT || 8080}`);
+app.listen(config.port, () => {
+  console.log(
+    `Aplicação ativa :D |http://localhost:${config.port}`
+  );
 });

@@ -1,3 +1,8 @@
 {
-  "extends": ["config:js-lib"]
+  "extends": ["config:js-lib", ":dependencyDashboard"],
+  "rangeStrategy": "pin",
+  "separateMajorMinor": true,
+  "labels": ["dependencies", "security"],
+  "automerge": false,
+  "securityUpdates": true
 }
