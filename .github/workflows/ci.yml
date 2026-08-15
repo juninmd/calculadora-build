@@ -1,0 +1,161 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: Run Linter
+        run: npm run lint
+      - name: Check Code Formatting
+        run: npm run format:check
+      - name: Check Dependencies for Vulnerabilities
+        run: npm audit --audit-level=high
+
+  test:
+    runs-on: ubuntu-latest
+    needs: lint
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: Run Tests
+        run: npm run test:ci
+      - name: Upload Coverage Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage/
+          if-no-files-found: error
+      - name: Upload Coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          files: coverage/lcov.info
+          fail_ci_if_error: false
+      - name: Notify on Failure
+        if: failure()
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          HAS_SLACK: ${{ secrets.SLACK_WEBHOOK != '' }}
+        run: |
+          if [ "$HAS_SLACK" = "true" ]; then
+            curl -sS -X POST -H 'Content-type: application/json' \
+              --data "{\"text\":\":red_circle: *Tests failed* in <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}>\"}" \
+              "$SLACK_WEBHOOK"
+          fi
+
+  build:
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: Build
+        run: npm run build
+      - name: Upload Build Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: calculadora-build-${{ github.sha }}
+          path: |
+            .
+            !node_modules
+            !coverage
+          if-no-files-found: error
+
+  deploy-staging:
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.ref == 'refs/heads/develop' && github.event_name == 'push'
+    environment: staging
+    steps:
+      - uses: actions/checkout@v4
+      - name: Trigger Staging Deployment
+        if: env.HAS_WEBHOOK == 'true'
+        env:
+          DEPLOY_WEBHOOK_URL: ${{ secrets.DEPLOY_WEBHOOK_URL }}
+          HAS_WEBHOOK: ${{ secrets.DEPLOY_WEBHOOK_URL != '' }}
+        run: curl --fail --silent --show-error --max-time 60 -X POST "$DEPLOY_WEBHOOK_URL"
+      - name: Health Check (Staging)
+        if: env.APP_URL != ''
+        env:
+          APP_URL: ${{ secrets.APP_URL }}
+        run: curl --fail --silent --show-error --max-time 60 "$APP_URL/"
+      - name: Notify on Failure
+        if: failure()
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          HAS_SLACK: ${{ secrets.SLACK_WEBHOOK != '' }}
+        run: |
+          if [ "$HAS_SLACK" = "true" ]; then
+            curl -sS -X POST -H 'Content-type: application/json' \
+              --data "{\"text\":\":red_circle: *Staging deploy failed* in <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}>\"}" \
+              "$SLACK_WEBHOOK"
+          fi
+
+  deploy-prod:
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+      - name: Trigger Production Deployment
+        if: env.HAS_WEBHOOK == 'true'
+        env:
+          DEPLOY_WEBHOOK_URL: ${{ secrets.DEPLOY_WEBHOOK_URL }}
+          HAS_WEBHOOK: ${{ secrets.DEPLOY_WEBHOOK_URL != '' }}
+        run: curl --fail --silent --show-error --max-time 60 -X POST "$DEPLOY_WEBHOOK_URL"
+      - name: Health Check (Production)
+        if: env.APP_URL != ''
+        env:
+          APP_URL: ${{ secrets.APP_URL }}
+        run: curl --fail --silent --show-error --max-time 60 "$APP_URL/"
+      - name: Upload Source Maps to Sentry
+        if: env.SENTRY_AUTH_TOKEN != ''
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_ORG: ${{ secrets.SENTRY_ORG }}
+          SENTRY_PROJECT: ${{ secrets.SENTRY_PROJECT }}
+          SENTRY_RELEASE: calculadora@${{ github.sha }}
+        run: |
+          npx --yes @sentry/cli releases set-commits "$SENTRY_RELEASE" --auto
+          npx --yes @sentry/cli releases files "$SENTRY_RELEASE" upload-sourcemaps . --ext js --ext map
+      - name: Notify on Failure
+        if: failure()
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          HAS_SLACK: ${{ secrets.SLACK_WEBHOOK != '' }}
+        run: |
+          if [ "$HAS_SLACK" = "true" ]; then
+            curl -sS -X POST -H 'Content-type: application/json' \
+              --data "{\"text\":\":red_circle: *Production deploy failed* in <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}>\"}" \
+              "$SLACK_WEBHOOK"
+          fi
