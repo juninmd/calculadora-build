@@ -1,0 +1,14 @@
+node_modules/
+coverage/
+assets/
+index.html
+*.bundle.js
+*.bundle.js.map
+*.bundle.css
+*.min.css
+*.woff2
+*.woff
+*.ttf
+*.eot
+*.ico
+package-lock.json

@@ -39,7 +39,7 @@ function createApp({ publicDir = ROOT_DIR, viewsDir = ROOT_DIR } = {}) {
   app.engine('html', engines.mustache);
   app.set('view engine', 'html');
 
-  app.get('*', (req, res) => {
+  app.get('/*', (req, res) => {
     res.render('index.html');
   });
 
