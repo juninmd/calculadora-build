@@ -1,0 +1,21 @@
+{
+  "root": true,
+  "env": {
+    "node": true,
+    "es2021": true,
+    "jest": true
+  },
+  "extends": ["eslint:recommended"],
+  "parserOptions": {
+    "ecmaVersion": "latest",
+    "sourceType": "commonjs"
+  },
+  "ignorePatterns": [
+    "node_modules/",
+    "coverage/",
+    "assets/",
+    "*.bundle.js",
+    "*.bundle.js.map",
+    "*.min.css"
+  ]
+}

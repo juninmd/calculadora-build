@@ -1,29 +1,120 @@
-```markdown
 # Calculadora Build
 
-This repository contains a standard software project.
+[![CI/CD Pipeline](https://github.com/juninmd/calculadora-build/actions/workflows/ci.yml/badge.svg)](https://github.com/juninmd/calculadora-build/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/juninmd/calculadora-build/branch/main/graph/badge.svg)](https://codecov.io/gh/juninmd/calculadora-build)
+[![GitHub release](https://img.shields.io/github/release/juninmd/calculadora-build.svg)](https://github.com/juninmd/calculadora-build/releases)
 
-## Installation
+Sistema de Informação — Calculadora. Aplicação web servida por um servidor
+[Express](https://expressjs.com/) (Node.js) a partir de artefatos de build já
+compilados (Angular).
 
-To install this project, run:
+## Requisitos
+
+- Node.js >= 18
+- npm >= 9
+
+## Instalação
 
 ```bash
-npm install -g @codicons/calculator-build
+npm install
 ```
 
-## Usage
+## Execução local
 
-1.  **Initialize:** Navigate to the project directory in your terminal and run `npm run init`.
-2.  **Run:**  Execute the `calculadora-build` command in your terminal.
-3.  **Build:**  Run `calculadora-build build` to compile the code.
-4.  **Run:** Run the `calculadora-build` command to execute the application.
-
-## Files
-
-*   `.gitignore`: Specifies files to ignore.
-*   3rdpartylicenses.txt: Contains license information.
-*   Procfile: Defines the application's entry point.
-*   Roboto-Bold.39b2c3031be6b4ea96e2.woff2, Roboto-Bold.dc81817def276b4f2139.woff, Roboto-Bold.e31fcf1885e371e19f57.ttf, Roboto-Bold.ecdd509cadbf1ea78b8d.eot, Roboto-Light.3b813c2ae0d04909a33a.woff, Roboto-Light.46e48ce0628835f68a73.ttf, Roboto-Light.69f8a0611f2305dc12965.woff2, Roboto-Light.a990f611f2305dc12965.eot, assets, favicon.ico, index.html, inline.7399dc78b564a560ed0c.bundle.js, inline.8b70bc74855357a75f1b.bundle.js, inline.8c05ee1c694c2ec233ec.bundle.js, inline.ac83a4cd5db31c4a3019.bundle.js, inline.b8bfed1875e38d2623fd.bundle.js, inline.bundle.js, inline.bundle.js.map, inline.d4487eca99a7888e08e8.bundle.js, inline.f811abc8ef26e965ebd0.bundle.js, main.1a30ca6e9e358dfbf106.bundle.js, main.3b71578c6352893e34fb.bundle.js, main.7742122e22da277cc378.bundle.js, main.7bb576a2e1af3a55db81.bundle.js, main.993708d267116fbb55bc.bundle.js, main.a5930465e9dfce521a0e.bundle.js, main.bundle.js, main.bundle.js.map, main.fb670009b39859404f69.bundle.js, materialicons.dfc4be8167690d9d34c6.woff2, package.json, polyfills.1abbd9052deebe85ca47.bundle.js, polyfills.34c267ddff87908e0732.bundle.js, polyfills.4d505616cd790dee3d9c.bundle.js, polyfills.bundle.js, polyfills.bundle.js.map, polyfills.f79638ed7feae21d3717.bundle.js, vendor.5ffe7b526a836671707f.bundle.js, vendor.87db81e00a8547c2ee7a.bundle.js, vendor.88ca2e7fbf26d8f539d2.bundle.js, vendor.9e529c57867383154b9b.bundle.js, vendor.bundle.js, vendor.bundle.js.map, vendor.bundle.js.map, vendor.bundle.js.map
-
-Include a short description, an installation section, and a usage section based on the files you see. Only return the raw markdown content, no conversational text.
+```bash
+npm start
 ```
+
+O servidor sobe em `http://localhost:8080` (ou na porta definida por `PORT`).
+
+## Testes
+
+```bash
+# Rodar os testes com cobertura (mínimo exigido: 80%)
+npm test
+
+# Modo watch
+npm run test:watch
+
+# Modo CI (gera relatórios de cobertura + JUnit em coverage/)
+npm run test:ci
+```
+
+Os relatórios são gerados em `coverage/` (`lcov.info` e `junit.xml`).
+
+## Qualidade
+
+```bash
+npm run lint          # ESLint
+npm run format:check  # Prettier (verificação)
+npm run format        # Prettier (formatação)
+npm run audit         # npm audit --audit-level=high
+```
+
+## Build
+
+O repositório já contém os artefatos compilados. O script de build valida a
+integridade deles (referências em `index.html` existentes e sintaxe dos bundles):
+
+```bash
+npm run build
+```
+
+## CI/CD
+
+O pipeline está em `.github/workflows/ci.yml` e é acionado por eventos:
+
+- `push` para `main` e `develop`
+- `pull_request` para `main` e `develop`
+
+| Stage            | O que faz                                                                                     |
+| ---------------- | --------------------------------------------------------------------------------------------- |
+| `lint`           | ESLint, Prettier e `npm audit`                                                                |
+| `test`           | Jest + cobertura (>= 80%) + upload para Codecov                                               |
+| `build`          | Verifica artefatos e publica build versionado                                                 |
+| `deploy-staging` | Deploy automático para staging ao dar push em `develop`                                       |
+| `deploy-prod`    | Deploy para produção ao dar push em `main` (requer aprovação manual no ambiente `production`) |
+
+### Variáveis de ambiente / secrets
+
+| Variável                        | Obrigatória | Descrição                                      |
+| ------------------------------- | ----------- | ---------------------------------------------- |
+| `PORT`                          | Não         | Porta do servidor (padrão: `8080`)             |
+| `DEPLOY_WEBHOOK_URL`            | Não         | Webhook disparado no deploy (staging/produção) |
+| `APP_URL`                       | Não         | URL usada no health check pós-deploy           |
+| `SLACK_WEBHOOK`                 | Não         | Webhook do Slack para notificações de falha    |
+| `CODECOV_TOKEN`                 | Não         | Token de upload para o Codecov                 |
+| `SENTRY_AUTH_TOKEN`             | Não         | Token do Sentry para upload de source maps     |
+| `SENTRY_ORG` / `SENTRY_PROJECT` | Não         | Organização/projeto Sentry                     |
+
+> Os steps de deploy são condicionados à presença dos secrets — sem eles o
+> pipeline executa normalmente até o stage `build`.
+
+## Deploy
+
+- **Staging:** automático via push em `develop` (ambiente `staging`).
+- **Produção:** automático via push em `main` (ambiente `production`), pausado
+  até aprovação manual na interface do GitHub.
+- **Health check:** pós-deploy, o pipeline verifica `APP_URL`.
+- **Rollback:** re-execute o último deploy bem-sucedido (Re-run jobs) ou reverta
+  o release/commit e faça push. Para apps Heroku: `heroku releases:rollback`.
+
+## Estrutura
+
+```
+server.js            # Entrypoint (node server.js)
+src/app.js           # Criação do app Express (testável)
+src/server.js        # Boot do servidor (createServer/main)
+test/                # Testes unitários, de integração e E2E
+scripts/             # Scripts auxiliares (ex.: verify-build)
+.github/workflows/   # Pipelines de CI/CD
+```
+
+## Contribuindo
+
+Veja [CONTRIBUTING.md](CONTRIBUTING.md) para as diretrizes de desenvolvimento,
+qualidade e CI/CD.
+
+## Licença
+
+ISC
